@@ -16,6 +16,8 @@
 
 #pragma mark - slilder
 
+//响应 UIControlEventTouchUpInside 和 UIControlEventValueChanged 事件
+
 @interface SMColorSlider : UIControl
 
 @property (nonatomic,strong) UIColor* selectColor;

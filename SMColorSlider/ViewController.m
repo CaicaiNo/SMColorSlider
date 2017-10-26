@@ -31,7 +31,7 @@
     
     NSArray *colors = [NSArray arrayWithObjects:BlackPen,RedPen,GreenPen,RoseRedPen,BluePen,YellowPen,OrangePen,CoffeePen, nil];
     
-    smColor = [[SMColorSlider alloc]initWithFrame:CGRectMake(50, 250, CGRectGetWidth(self.view.frame)-100, 40) colors:colors];
+    smColor = [[SMColorSlider alloc]initWithFrame:CGRectMake(50, 250, CGRectGetWidth(self.view.frame)-100, 30) colors:colors];
     [self.view addSubview:smColor];
     // Do any additional setup after loading the view, typically from a nib.
 }

@@ -23,7 +23,9 @@
 
 #define COLOR_SCAN 0 //是否自动扫描当前thumb位置的颜色
 
-#define COLOR_BALL_H 20 //彩色球 距离thumb上方的高度距离
+#define COLOR_BALL_H 24 //彩色球 距离thumb上方的高度距离
+
+#define AUTO_SET_MIDDLE 1 //自动居中模式  选中该颜色 会自动居中
 
 @implementation SMThumbView
 {
@@ -45,14 +47,14 @@
     if (self = [super initWithFrame:frame]) {
         
         radius = 5.;
-        ballRadius = 8.;
+        ballRadius = 10.;
         _thumbColor = [UIColor blackColor];
         
         _bigView = [[UIView alloc]initWithFrame:CGRectMake(-M_ThumbX, -M_ThumbY, frame.size.width + 2*(M_ThumbX), frame.size.height + 2*(M_ThumbY))];
         
         
         _thumbPath = [[UIBezierPath alloc]init];
-     
+        
         [_thumbPath addArcWithCenter:CGPointMake(_bigView.frame.size.width/2, radius + M_ThumbY) radius:radius startAngle:M_PI endAngle:M_PI*2 clockwise:YES];
         [_thumbPath moveToPoint:CGPointMake(_bigView.frame.size.width/2 + radius, radius + M_ThumbY)];
         [_thumbPath addLineToPoint:CGPointMake(_bigView.frame.size.width/2 + radius, M_ThumbY + frame.size.height - radius)];
@@ -76,7 +78,7 @@
         _ballLayer = [CAShapeLayer layer];
         _ballLayer.path = _ballPath.CGPath;
         _ballLayer.lineWidth = 0.2f;
-        _ballLayer.strokeColor = [UIColor whiteColor].CGColor;
+        //        _ballLayer.strokeColor = [UIColor whiteColor].CGColor;
         _ballLayer.fillColor = _thumbColor.CGColor;
         
         _ballLayer.opacity = 0.f;
@@ -116,7 +118,7 @@
 
 - (void)setTintColor:(UIColor*)color animate:(BOOL)isAnimted{
     
- 
+    
     if (!CGColorEqualToColor(_thumbColor.CGColor, color.CGColor)) {
         _thumbColor = color;
         
@@ -136,7 +138,7 @@
             _ballLayer.opacity = 1.f;
         }
     }
-
+    
 }
 
 - (void)setThumbColor:(UIColor *)color{
@@ -174,22 +176,29 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        
         _recordFrame = frame;
-        _radius = 8;
+        _radius = 6;
         //colors
         minL = MIN(frame.size.width, frame.size.height);
         maxL = MAX(frame.size.width, frame.size.height);
         _colorLayer = [CAGradientLayer layer];
         _colorLayer.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
-        _colors = colors;
+        
+        if (colors) {
+            _colors = colors;
+        }else{
+            _colors = [NSArray arrayWithObjects:BlackPen,RedPen,GreenPen,RoseRedPen,BluePen,YellowPen,OrangePen,CoffeePen, nil];
+        }
+        
         _locations = [NSMutableArray array];
         
-        CGFloat b = 1.00/(colors.count);
+        CGFloat b = 1.00/(_colors.count);
         
         NSMutableArray *mLocations = [NSMutableArray array];
         
         for (int i = 1; i <= _colors.count - 1; i++) {
-
+            
             [mLocations addObject:[NSNumber numberWithFloat:b*(i)]];
             [mLocations addObject:[NSNumber numberWithFloat:b*(i)]];
             
@@ -204,31 +213,31 @@
                 UIColor *tmp = _colors[i];
                 [mColors addObject:(__bridge id)tmp.CGColor];
             }else{
-                UIColor *tmp = colors[i];
+                UIColor *tmp = _colors[i];
                 [mColors addObject:(__bridge id)tmp.CGColor];
                 [mColors addObject:(__bridge id)tmp.CGColor];
-         
+                
             }
         }
         
-//        _colorLayer.colors = @[(__bridge id)BlackPen.CGColor,
-//                               (__bridge id)RedPen.CGColor,
-//                                 (__bridge id)RedPen.CGColor,
-//                               (__bridge id)GreenPen.CGColor,
-//                               (__bridge id)GreenPen.CGColor,
-//                               (__bridge id)RoseRedPen.CGColor,
-//                               (__bridge id)RoseRedPen.CGColor,
-//                               (__bridge id)BluePen.CGColor];
-//        _colorLayer.locations  = @[@(0.2),@(0.2),@(0.4), @(0.4), @(0.6),@(0.6),@(0.8),@(0.8)];
+        //        _colorLayer.colors = @[(__bridge id)BlackPen.CGColor,
+        //                               (__bridge id)RedPen.CGColor,
+        //                                 (__bridge id)RedPen.CGColor,
+        //                               (__bridge id)GreenPen.CGColor,
+        //                               (__bridge id)GreenPen.CGColor,
+        //                               (__bridge id)RoseRedPen.CGColor,
+        //                               (__bridge id)RoseRedPen.CGColor,
+        //                               (__bridge id)BluePen.CGColor];
+        //        _colorLayer.locations  = @[@(0.2),@(0.2),@(0.4), @(0.4), @(0.6),@(0.6),@(0.8),@(0.8)];
         
         _colorLayer.colors = mColors;
         _colorLayer.locations  = mLocations;
-
         
-   
+        
+        
         _colorLayer.startPoint = CGPointMake(0, 0);
         _colorLayer.endPoint   = CGPointMake(1, 0);
-
+        
         
         [self.layer addSublayer:_colorLayer];
         
@@ -241,7 +250,7 @@
         
         [_maskPath addArcWithCenter:CGPointMake(maxL - _radius, minL/2) radius:_radius startAngle:M_PI_2*3 endAngle:M_PI_2 clockwise:YES];
         [_maskPath addLineToPoint:CGPointMake(_radius, minL/2 + _radius)];
-   
+        
         
         _maskLayer = [CAShapeLayer layer];
         _maskLayer.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
@@ -258,7 +267,7 @@
         [self addSubview:_thumbView];
         
         _originX = _thumbView.frame.origin.x;
-   
+        
         [_thumbView setThumbColor:_colors[0]];
         
     }
@@ -266,7 +275,7 @@
 }
 
 
-- (void)setThumbX:(CGFloat)x{
+- (void)setThumbX:(CGFloat)x isTap:(BOOL)tap{
     
     CGFloat offsetX = (x - _originX);
     
@@ -283,7 +292,31 @@
     
     frame.origin.x = tmp;
     
-    [_thumbView setFrame:frame];
+    if (tap) {
+#if AUTO_SET_MIDDLE
+        CGFloat M = (self.bounds.size.width / _colors.count); //每小格子 距离
+        CGFloat M_2 = M/2; //每小格子 一半的距离
+        
+        CGFloat W_2 = _thumbView.bounds.size.width/2;
+        
+        NSInteger C = (frame.origin.x + W_2) / M; //格子数 int
+        
+        if (C >= _colors.count) {
+            C = _colors.count - 1;//防止越界
+        }
+        
+        CGFloat R = C*M + M_2 - W_2; //结果位置
+        
+        frame.origin.x = R;
+        
+        [_thumbView setFrame:frame];
+#else
+        [_thumbView setFrame:frame];
+#endif
+    }else{
+        [_thumbView setFrame:frame];
+    }
+    
     
     if (_originX != frame.origin.x) {
         _originX = frame.origin.x;
@@ -297,7 +330,7 @@
         for (int i = 0; i < _locations.count; i ++) {
             
             if (i < _locations.count - 1) {
-    
+                
                 if (percent > [_locations[i] floatValue]) {
                     if (percent < [_locations[i + 1] floatValue]) {
                         _selectColor = _colors[i+1];
@@ -308,7 +341,7 @@
                     _selectColor = _colors[0];
                     [_thumbView setTintColor:_colors[0] animate:YES];
                     break;
-
+                    
                 }
             }else{
                 if (percent > [_locations[i] floatValue]) {
@@ -324,8 +357,15 @@
     
 }
 
-- (void)setLandscape:(BOOL)isLand{
+- (void)setFrame:(CGRect)frame{
+    [super setFrame:frame];
+    _recordFrame = frame;
+    
+    _colorLayer.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+}
 
+- (void)setLandscape:(BOOL)isLand{
+    
     if (isRotateLandscape == isLand) {
         return;
     }
@@ -361,10 +401,8 @@
     if (!CGRectContainsPoint(responceR, point)) {
         
         NSLog(@"直接点击");
-
-        [self setThumbX:point.x];
         
-//        [_thumbView setBallHidden:YES delay:1];
+        [self setThumbX:point.x isTap:YES];
         
         [self sendActionsForControlEvents:UIControlEventTouchUpInside];
         
@@ -380,22 +418,51 @@
 - (BOOL)continueTrackingWithTouch:(UITouch *)touch withEvent:(nullable UIEvent *)event {
     
     CGPoint point = [touch locationInView:self];
-
-    [self setThumbX:point.x];
-
+    
+    [self setThumbX:point.x isTap:NO];
+    
     return YES;
     
 }
 
 - (void)endTrackingWithTouch:(nullable UITouch *)touch withEvent:(nullable UIEvent *)event {
-//    CGPoint point = [touch locationInView:self];
+    //    CGPoint point = [touch locationInView:self];
     
-    [_thumbView setBallHidden:YES delay:1.];
+    [_thumbView setBallHidden:YES delay:0];
+    
+#if AUTO_SET_MIDDLE
+    if (_colors.count > 0) {
+        
+        [UIView animateWithDuration:0.3 animations:^{
+            CGRect frame = _thumbView.frame;
+            
+            CGFloat M = (self.bounds.size.width / _colors.count); //每小格子 距离
+            CGFloat M_2 = M/2; //每小格子 一半的距离
+            
+            CGFloat W_2 = _thumbView.bounds.size.width/2;
+            
+            NSInteger C = (frame.origin.x + W_2) / M; //格子数 int
+            
+            if (C >= _colors.count) {
+                C = _colors.count - 1;//防止越界
+            }
+            
+            CGFloat R = C*M + M_2 - W_2; //结果位置
+            
+            frame.origin.x = R;
+            
+            [_thumbView setFrame:frame];
+        }];
+        
+        
+    }
+#else
+#endif
+    
     //增加控制事件
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
 }
-
 
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event{
@@ -408,7 +475,8 @@
     }else{
         return [super hitTest:point withEvent:event];
     }
-  
+    
 }
 
 @end
+
