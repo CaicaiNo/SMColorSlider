@@ -310,6 +310,8 @@
         frame.origin.x = R;
         
         [_thumbView setFrame:frame];
+        
+        [_thumbView setBallHidden:YES delay:0.8];
 #else
         [_thumbView setFrame:frame];
 #endif
@@ -406,6 +408,8 @@
         
         [self sendActionsForControlEvents:UIControlEventTouchUpInside];
         
+        
+        
         return NO;
     }
     
@@ -479,4 +483,3 @@
 }
 
 @end
-
