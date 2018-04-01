@@ -16,15 +16,14 @@
 
 #pragma mark - slilder
 
-//响应 UIControlEventTouchUpInside 和 UIControlEventValueChanged 事件
+//response UIControlEventTouchUpInside and UIControlEventValueChanged event
 
 @interface SMColorSlider : UIControl
 
-@property (nonatomic,strong) UIColor* selectColor;
+@property (nonatomic,strong) UIColor* selectColor; //current color
 
 - (instancetype)initWithFrame:(CGRect)frame
-                       colors:(NSArray<UIColor*>*)colors; //暂时写的固定值
-
+                       colors:(NSArray<UIColor*>*)colors; //if colors is nil,will set deault value
 
 
 - (void)setLandscape:(BOOL)isLand;//设置横竖屏 旋转

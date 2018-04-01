@@ -7,16 +7,6 @@
 //
 
 #import "SMColorSlider.h"
-#import "UIColor+HexString.h"
-
-#define BlackPen   [UIColor colorFromHexString:@"#000000"]  //笔-黑色
-#define RedPen   [UIColor colorFromHexString:@"#ff0000"]    //笔-红色
-#define GreenPen   [UIColor colorFromHexString:@"#00ff00"]   //笔-绿色
-#define RoseRedPen   [UIColor colorFromHexString:@"#ff00ff"]  //笔-玫红
-#define BluePen   [UIColor colorFromHexString:@"#0000ff"]     //笔-蓝色
-#define YellowPen   [UIColor colorFromHexString:@"#ffff00"]    //笔-黄色
-#define OrangePen   [UIColor colorFromHexString:@"#ff7f00"]    //笔-橙色
-#define CoffeePen   [UIColor colorFromHexString:@"#996600"]    //笔-咖啡
 
 #define M_ThumbX (15)
 #define M_ThumbY (10)
@@ -26,6 +16,69 @@
 #define COLOR_BALL_H 24 //彩色球 距离thumb上方的高度距离
 
 #define AUTO_SET_MIDDLE 1 //自动居中模式  选中该颜色 会自动居中
+
+@implementation UIColor (HexString)
+
++ (UIColor *)colorFromHexString:(NSString *)hexString {
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:hexString];
+    [scanner setScanLocation:1]; // bypass '#' character
+    [scanner scanHexInt:&rgbValue];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
+}
+
+
++ (CGFloat) colorComponentFrom: (NSString *) string start: (NSUInteger) start length: (NSUInteger) length {
+    NSString *substring = [string substringWithRange: NSMakeRange(start, length)];
+    NSString *fullHex = length == 2 ? substring : [NSString stringWithFormat: @"%@%@", substring, substring];
+    unsigned hexComponent;
+    [[NSScanner scannerWithString: fullHex] scanHexInt: &hexComponent];
+    return hexComponent / 255.0;
+}
+
+//@"4099FF"
++ (UIColor *) colorWithHexNSString: (NSString *) hexString {
+    NSString *colorString = [[hexString stringByReplacingOccurrencesOfString: @"#" withString: @""] uppercaseString];
+    CGFloat alpha, red, blue, green;
+    switch ([colorString length]) {
+        case 3: // #RGB
+            alpha = 1.0f;
+            red   = [self colorComponentFrom: colorString start: 0 length: 1];
+            green = [self colorComponentFrom: colorString start: 1 length: 1];
+            blue  = [self colorComponentFrom: colorString start: 2 length: 1];
+            break;
+        case 4: // #ARGB
+            alpha = [self colorComponentFrom: colorString start: 0 length: 1];
+            red   = [self colorComponentFrom: colorString start: 1 length: 1];
+            green = [self colorComponentFrom: colorString start: 2 length: 1];
+            blue  = [self colorComponentFrom: colorString start: 3 length: 1];
+            break;
+        case 6: // #RRGGBB
+            alpha = 1.0f;
+            red   = [self colorComponentFrom: colorString start: 0 length: 2];
+            green = [self colorComponentFrom: colorString start: 2 length: 2];
+            blue  = [self colorComponentFrom: colorString start: 4 length: 2];
+            break;
+        case 8: // #AARRGGBB
+            alpha = [self colorComponentFrom: colorString start: 0 length: 2];
+            red   = [self colorComponentFrom: colorString start: 2 length: 2];
+            green = [self colorComponentFrom: colorString start: 4 length: 2];
+            blue  = [self colorComponentFrom: colorString start: 6 length: 2];
+            break;
+        default:
+            return nil;
+    }
+    return [UIColor colorWithRed: red green: green blue: blue alpha: alpha];
+}
+
+- (NSString*)RGBAString{
+    CGFloat red,green,blue,alpha;
+    [self getRed:&red green:&green blue:&blue alpha:&alpha];
+    
+    return [NSString stringWithFormat:@"red:%.02f,green:%.02f,blue:%.02f,alpha:%.02f",red,green,blue,alpha];
+}
+
+@end
 
 @implementation SMThumbView
 {
@@ -41,6 +94,8 @@
     UIBezierPath *_ballPath; //颜色球 路径
     CGFloat ballRadius;
 }
+
+#pragma mark - lazy
 
 
 - (instancetype)initWithFrame:(CGRect)frame{
@@ -157,26 +212,37 @@
     UIBezierPath *_maskPath;
     
     double _radius;
-    CGFloat minL; //最短 - frame.with or height
-    CGFloat maxL; //最长 - frame.with or height
+    CGFloat minL; //min length - frame.with or height
+    CGFloat maxL; //max length - frame.with or height
     
     SMThumbView *_thumbView;
     
     CGFloat _originX;
     
-    //colors颜色数组处理
+    //colors
     NSMutableArray *_locations;
     NSArray *_colors;
     
-    BOOL isRotateLandscape;//是否已经旋转
+    BOOL isRotateLandscape;
     CGRect _recordFrame;
 }
+
+- (NSArray *)colorsDefault {
+    return @[[UIColor colorFromHexString:@"#000000"],[UIColor colorFromHexString:@"#ff0000"],[UIColor colorFromHexString:@"#00ff00"],[UIColor colorFromHexString:@"#ff00ff"],[UIColor colorFromHexString:@"#0000ff"],[UIColor colorFromHexString:@"#ffff00"],[UIColor colorFromHexString:@"#ff7f00"],[UIColor colorFromHexString:@"#996600"]];
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame
+                       colors:(NSArray<UIColor*>*)colors {
+    return [self initWithFrame:frame colors:colors fade:NO];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame
                        colors:(NSArray<UIColor*>*)colors
+                         fade:(BOOL)isFade;
 {
     self = [super initWithFrame:frame];
     if (self) {
-        
         _recordFrame = frame;
         _radius = 6;
         //colors
@@ -184,30 +250,22 @@
         maxL = MAX(frame.size.width, frame.size.height);
         _colorLayer = [CAGradientLayer layer];
         _colorLayer.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
-        
         if (colors) {
             _colors = colors;
         }else{
-            _colors = [NSArray arrayWithObjects:BlackPen,RedPen,GreenPen,RoseRedPen,BluePen,YellowPen,OrangePen,CoffeePen, nil];
+            _colors = [self colorsDefault];
         }
-        
         _locations = [NSMutableArray array];
-        
         CGFloat b = 1.00/(_colors.count);
-        
         NSMutableArray *mLocations = [NSMutableArray array];
+        NSMutableArray *mColors = [NSMutableArray array];
+        
         
         for (int i = 1; i <= _colors.count - 1; i++) {
-            
             [mLocations addObject:[NSNumber numberWithFloat:b*(i)]];
             [mLocations addObject:[NSNumber numberWithFloat:b*(i)]];
-            
             [_locations addObject:[NSNumber numberWithFloat:b*(i)]];
         }
-        
-        
-        
-        NSMutableArray *mColors = [NSMutableArray array];
         for (int i = 0; i < _colors.count; i ++) {
             if (i == 0 || i == _colors.count - 1) {
                 UIColor *tmp = _colors[i];
@@ -219,16 +277,6 @@
                 
             }
         }
-        
-        //        _colorLayer.colors = @[(__bridge id)BlackPen.CGColor,
-        //                               (__bridge id)RedPen.CGColor,
-        //                                 (__bridge id)RedPen.CGColor,
-        //                               (__bridge id)GreenPen.CGColor,
-        //                               (__bridge id)GreenPen.CGColor,
-        //                               (__bridge id)RoseRedPen.CGColor,
-        //                               (__bridge id)RoseRedPen.CGColor,
-        //                               (__bridge id)BluePen.CGColor];
-        //        _colorLayer.locations  = @[@(0.2),@(0.2),@(0.4), @(0.4), @(0.6),@(0.6),@(0.8),@(0.8)];
         
         _colorLayer.colors = mColors;
         _colorLayer.locations  = mLocations;
@@ -377,8 +425,6 @@
         CGAffineTransform transform = CGAffineTransformIdentity;
         transform = CGAffineTransformTranslate(transform, _recordFrame.size.height, 0);
         transform = CGAffineTransformRotate(transform,M_PI_2);
-        
-        
         self.layer.affineTransform = transform;
         self.layer.position = _recordFrame.origin;
     }else{
@@ -401,15 +447,9 @@
     
     //可滑动范围
     if (!CGRectContainsPoint(responceR, point)) {
-        
         NSLog(@"直接点击");
-        
         [self setThumbX:point.x isTap:YES];
-        
         [self sendActionsForControlEvents:UIControlEventTouchUpInside];
-        
-        
-        
         return NO;
     }
     
@@ -439,20 +479,14 @@
         
         [UIView animateWithDuration:0.3 animations:^{
             CGRect frame = _thumbView.frame;
-            
             CGFloat M = (self.bounds.size.width / _colors.count); //每小格子 距离
             CGFloat M_2 = M/2; //每小格子 一半的距离
-            
             CGFloat W_2 = _thumbView.bounds.size.width/2;
-            
             NSInteger C = (frame.origin.x + W_2) / M; //格子数 int
-            
             if (C >= _colors.count) {
                 C = _colors.count - 1;//防止越界
             }
-            
             CGFloat R = C*M + M_2 - W_2; //结果位置
-            
             frame.origin.x = R;
             
             [_thumbView setFrame:frame];
@@ -462,7 +496,6 @@
     }
 #else
 #endif
-    
     //增加控制事件
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
@@ -483,3 +516,6 @@
 }
 
 @end
+
+
+

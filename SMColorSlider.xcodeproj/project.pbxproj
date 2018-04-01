@@ -14,7 +14,6 @@
 		04EB45AD1F79F096001D8077 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04EB45AC1F79F096001D8077 /* Assets.xcassets */; };
 		04EB45B01F79F096001D8077 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04EB45AE1F79F096001D8077 /* LaunchScreen.storyboard */; };
 		04EB45BB1F79F0B0001D8077 /* SMColorSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 04EB45B81F79F0B0001D8077 /* SMColorSlider.m */; };
-		04EB45BC1F79F0B0001D8077 /* UIColor+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 04EB45BA1F79F0B0001D8077 /* UIColor+HexString.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,8 +29,6 @@
 		04EB45B11F79F096001D8077 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		04EB45B71F79F0B0001D8077 /* SMColorSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMColorSlider.h; sourceTree = "<group>"; };
 		04EB45B81F79F0B0001D8077 /* SMColorSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMColorSlider.m; sourceTree = "<group>"; };
-		04EB45B91F79F0B0001D8077 /* UIColor+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+HexString.h"; sourceTree = "<group>"; };
-		04EB45BA1F79F0B0001D8077 /* UIColor+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+HexString.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +65,6 @@
 				04EB45A41F79F096001D8077 /* AppDelegate.m */,
 				04EB45B71F79F0B0001D8077 /* SMColorSlider.h */,
 				04EB45B81F79F0B0001D8077 /* SMColorSlider.m */,
-				04EB45B91F79F0B0001D8077 /* UIColor+HexString.h */,
-				04EB45BA1F79F0B0001D8077 /* UIColor+HexString.m */,
 				04EB45A61F79F096001D8077 /* ViewController.h */,
 				04EB45A71F79F096001D8077 /* ViewController.m */,
 				04EB45A91F79F096001D8077 /* Main.storyboard */,
@@ -160,7 +155,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04EB45BC1F79F0B0001D8077 /* UIColor+HexString.m in Sources */,
 				04EB45BB1F79F0B0001D8077 /* SMColorSlider.m in Sources */,
 				04EB45A81F79F096001D8077 /* ViewController.m in Sources */,
 				04EB45A51F79F096001D8077 /* AppDelegate.m in Sources */,
@@ -321,6 +315,7 @@
 				04EB45B61F79F096001D8077 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
